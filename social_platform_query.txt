@@ -1,0 +1,94 @@
+1. Seleziona tutti gli utenti e calcolane l'età (25)
+
+SELECT `username` AS `utente`,  YEAR(CURDATE()) - YEAR(`birthdate`) AS `eta`
+FROM `users`;
+
+--------------------------------------------------------------------
+
+2. Seleziona tutti i post senza Like (13)
+
+SELECT *
+FROM `posts`
+WHERE `id` NOT IN (SELECT `post_id` FROM `likes`);
+
+--------------------------------------------------------------------
+
+3. Conta il numero di like per ogni post (165)
+
+SELECT `posts`.`id`, `title` AS `titolo_post`, COUNT(`posts`.`id`) AS `n_likes`
+FROM `posts`
+LEFT JOIN `likes` ON `posts`.`id` = `likes`.`post_id`
+GROUP BY `posts`.`id`, `title`;
+
+--------------------------------------------------------------------
+
+4. Ordina gli utenti per il numero di media caricati (25)
+
+SELECT `users`.`id`, `username` AS `utente`, COUNT(`medias`.`id`) AS `n_media`
+FROM `users`
+JOIN `medias` ON `users`.`id` = `medias`.`user_id`
+GROUP BY `users`.`id`
+ORDER BY `n_media` DESC;
+
+--------------------------------------------------------------------
+
+5. Ordina gli utenti per totale di likes ricevuti nei loro posts (25)
+
+SELECT `users`.`id`, `username` AS `utente`, COUNT(`posts`.id) AS `totale_likes` 
+FROM `users`
+JOIN `posts` ON `users`.`id` = `posts`.`user_id`
+JOIN `likes` ON `posts`.id = `likes`.`post_id`
+GROUP BY `users`.`id`, `username`
+ORDER BY `totale_likes` DESC;
+
+--------------------------------------------------------------------
+
+6. Seleziona tutti i post degli utenti tra i 20 e i 30 anni (49)
+
+SELECT `users`.`username`, `posts`.`id` AS `post_id`, YEAR(CURRENT_DATE()) - YEAR(`users`.`birthdate`) - (RIGHT(CURRENT_DATE(), 5) < RIGHT(`users`.`birthdate`, 5)) AS `age`
+FROM `users`
+JOIN `posts` ON `posts`.`user_id` = `users`.`id`
+WHERE YEAR(CURRENT_DATE()) - YEAR(`users`.`birthdate`) - (RIGHT(CURRENT_DATE(), 5) < RIGHT(`users`.`birthdate`, 5)) BETWEEN 20 AND 30;
+
+--------------------------------------------------------------------
+
+7. Seleziona il numero di post e di media per ogni utente (25)
+
+SELECT `users`.`id`, `users`.`username`, COUNT(DISTINCT `posts`.`id`) AS `n_post`, COUNT(DISTINCT `medias`.`id`) AS `n_media`
+FROM `users`
+JOIN `posts` ON `posts`.`user_id` = `users`.`id`
+JOIN `medias` ON `medias`.`user_id` = `users`.`id`
+GROUP BY `users`.`id`;
+
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+BONUS
+
+8. Seleziona tutti i post che contengono il tag 'serata' (8)
+
+SELECT *
+FROM `posts`
+WHERE JSON_CONTAINS(`tags`, '"serata"');
+
+--------------------------------------------------------------------
+
+9. Ordina i post in base al numero di tag (165)
+
+SELECT *, JSON_LENGTH(`tags`) AS `tags_num` 
+FROM `posts`
+ORDER BY `tags_num` DESC;
+
+--------------------------------------------------------------------
+
+10. Ordina gli utenti in base al numero di tag usati nei loro post (25)
+
+SELECT `users`.`username`, COUNT(JSON_LENGTH(`posts`.`tags`)) AS `tot_tags_used` 
+FROM `users`
+JOIN `posts` ON `users`.`id` = `posts`.`user_id`
+GROUP BY `users`.`id`
+ORDER BY `tot_tags_used` DESC  
+
+
+
+
